@@ -16,6 +16,7 @@ const GameBoard = () => {
   const [food, setFood] = useState(INITIAL_FOOD);
   const [direction, setDirection] = useState(DIRECTIONS.ArrowRight);
   const [gameOver, setGameOver] = useState(false);
+  const [score, setScore] = useState(0);
 
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -23,7 +24,6 @@ const GameBoard = () => {
         setDirection(DIRECTIONS[e.key]);
       }
     };
-
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, []);
@@ -56,6 +56,7 @@ const GameBoard = () => {
             x: Math.floor(Math.random() * GRID_SIZE),
             y: Math.floor(Math.random() * GRID_SIZE),
           });
+          setScore((s) => s + 1);
         } else {
           newSnake.pop();
         }
@@ -68,9 +69,20 @@ const GameBoard = () => {
     return () => clearInterval(interval);
   }, [direction, food, gameOver]);
 
+  const restartGame = () => {
+    setSnake(INITIAL_SNAKE);
+    setFood(INITIAL_FOOD);
+    setDirection(DIRECTIONS.ArrowRight);
+    setGameOver(false);
+    setScore(0);
+  };
+
   return (
     <div className="container text-center mt-4">
       <h2 className="text-primary">{gameOver ? "Game Over!" : "Snake Game"}</h2>
+      <p className="lead">Score: {score}</p>
+
+      {/* Game Grid */}
       <div className="d-flex justify-content-center mt-3">
         <div
           className="border border-dark rounded"
@@ -86,7 +98,7 @@ const GameBoard = () => {
           {[...Array(GRID_SIZE * GRID_SIZE)].map((_, i) => {
             const x = i % GRID_SIZE;
             const y = Math.floor(i / GRID_SIZE);
-            const isSnake = snake.some((segment) => segment.x === x && segment.y === y);
+            const isSnake = snake.some((s) => s.x === x && s.y === y);
             const isFood = food.x === x && food.y === y;
             return (
               <div
@@ -102,19 +114,45 @@ const GameBoard = () => {
           })}
         </div>
       </div>
+
+      {/* Restart Button */}
       {gameOver && (
-        <button
-          onClick={() => {
-            setSnake(INITIAL_SNAKE);
-            setFood(INITIAL_FOOD);
-            setDirection(DIRECTIONS.ArrowRight);
-            setGameOver(false);
-          }}
-          className="btn btn-danger mt-3"
-        >
+        <button onClick={restartGame} className="btn btn-danger mt-3">
           Restart Game
         </button>
       )}
+
+      {/* On-Screen Controller */}
+      <div className="mt-4">
+        <div className="d-flex justify-content-center mb-2">
+          <button
+            className="btn btn-secondary"
+            onClick={() => setDirection(DIRECTIONS.ArrowUp)}
+          >
+            ↑
+          </button>
+        </div>
+        <div className="d-flex justify-content-center gap-2">
+          <button
+            className="btn btn-secondary"
+            onClick={() => setDirection(DIRECTIONS.ArrowLeft)}
+          >
+            ←
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setDirection(DIRECTIONS.ArrowDown)}
+          >
+            ↓
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setDirection(DIRECTIONS.ArrowRight)}
+          >
+            →
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
